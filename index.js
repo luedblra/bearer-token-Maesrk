@@ -1,19 +1,18 @@
 const puppeteer = require('puppeteer');
 const CREDS     = require('./creds');
+const fs        = require('fs').promises;
+const { PendingXHR } = require('pending-xhr-puppeteer');
+const textRegex = /(javascript|html|XHR)/;
 
 async function run() {
-    const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
-    //const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({headless: false,args: ['--no-sandbox', '--disable-setuid-sandbox'],width:1024,height:800});
     const page = await browser.newPage();
     await page.setDefaultNavigationTimeout(0); 
-    await page.goto('https://www.maersk.com/portaluser/login', {waitUntil: 'networkidle0', timeout: 0});
-    await page.screenshot({ path: 'screenshots/github.png' });
+
+    await page.goto('https://www.maersk.com/instantPrice/', {waitUntil: 'networkidle0', timeout: 0});
 
     const USERNAME_SELECTOR = '#usernameInput';
     const PASSWORD_SELECTOR = '#passwordInput';
-    
-    
-
 
     await page.click(USERNAME_SELECTOR);
     await page.keyboard.type(CREDS.username);
@@ -22,30 +21,34 @@ async function run() {
     await page.keyboard.type(CREDS.password);
     console.log(CREDS.username);
     console.log(CREDS.password);
-   // const [button] = await page.$x("//button[contains(., 'Log in')]");
-  /*  await page.waitForSelector('button[class="button button--primary button--block"]');
-    await page.click('button[class="button button--primary button--block"]');
-*/
+    await page.screenshot({ path: 'screenshots/github.png' });
     const BUTTON_SELECTOR = '#login-form > fieldset > div:nth-child(4) > button';
-
     await page.click(BUTTON_SELECTOR);
-    await page.screenshot({ path: 'screenshots/github3.png' });
-    /*const query = "Log in";
-    page.evaluate( query => {
-        const elements = [...document.querySelectorAll('button.button button--primary button--block')];
+    const response = await page.waitForNavigation();
+    
+    page.on('response', (response) => {
+        const headers = response.headers();
 
-        // Either use .find or .filter, comment one of these
-        // find element with find
-        const targetElement = elements.find(e => e.innerText.includes(query));
-
-        // OR, find element with filter
-        // const targetElement = elements.filter(e => e.innerText.includes(query))[0];
-
-        // make sure the element exists, and only then click it
-        targetElement && targetElement.click();
-    }, query);*/
-
-    await page.waitForNavigation();
+        // example test: check if content-type contains javascript or html
+        const contentType = headers['content-type'];
+        if (textRegex.test(contentType)) {
+            console.log(response.url());
+        }
+    });
+    await page.goto(`...`);
+    await page.close();
+    
+    /*await fs.writeFile('./header.json', JSON.stringify(headers, null, 2), function(err) {
+        if (err) throw err;
+        console.log('completed write of headers');
+    });*/
+    
+    // SAVE COOKIES
+    const cookies = await page.cookies();
+    await fs.writeFile('./cookies.json', JSON.stringify(cookies, null, 2), function(err) {
+        if (err) throw err;
+        console.log('completed write of cookies');
+    });
     await page.screenshot({ path: 'screenshots/github2.png' });
     browser.close();
 }
