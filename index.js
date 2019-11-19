@@ -1,8 +1,6 @@
 const puppeteer = require('puppeteer');
 const CREDS     = require('./creds');
 const fs        = require('fs').promises;
-const { PendingXHR } = require('pending-xhr-puppeteer');
-const textRegex = /(javascript|html|XHR)/;
 
 async function run() {
     const browser = await puppeteer.launch({headless: false,args: ['--no-sandbox', '--disable-setuid-sandbox'],width:1024,height:800});
@@ -25,30 +23,37 @@ async function run() {
     const BUTTON_SELECTOR = '#login-form > fieldset > div:nth-child(4) > button';
     await page.click(BUTTON_SELECTOR);
     const response = await page.waitForNavigation();
-    
-    page.on('response', (response) => {
-        const headers = response.headers();
 
-        // example test: check if content-type contains javascript or html
-        const contentType = headers['content-type'];
-        if (textRegex.test(contentType)) {
-            console.log(response.url());
-        }
+    page.on('response', response => {
+        console.log('Response Request:', response.request());
+
+       /* const req = response.request();
+        if (req.url() === 'https://api.maersk.com/favourites?applicationName=product-prices&userId=productPricesSystemUser&customerCode=12400177853&brandCode=MAEU&componentName=config-params&isUserIdLevelOnly=true') {
+            response.buffer().then(
+                b => {
+                    console.log(`${response.status()} ${response.url()} ${b.length} bytes`);
+                },
+                e => {
+                    console.error(`${response.status()} ${response.url()} failed: ${e}`);
+                }
+            );
+        }*/
+
+        /*fs.writeFile('./logNode.txt', JSON.stringify(response.request()), function(err) {
+            if (err) throw err;
+            console.log('completed write of request');
+        });*/
+
     });
     await page.goto(`...`);
     await page.close();
-    
-    /*await fs.writeFile('./header.json', JSON.stringify(headers, null, 2), function(err) {
-        if (err) throw err;
-        console.log('completed write of headers');
-    });*/
-    
+
     // SAVE COOKIES
-    const cookies = await page.cookies();
+    /*const cookies = await page.cookies();
     await fs.writeFile('./cookies.json', JSON.stringify(cookies, null, 2), function(err) {
         if (err) throw err;
         console.log('completed write of cookies');
-    });
+    });*/
     await page.screenshot({ path: 'screenshots/github2.png' });
     browser.close();
 }
