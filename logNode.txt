@@ -1,6 +1,0 @@
-//let array = JSON.stringify(req.headers());
-                    let string = JSON.stringify(req.headers());
-                    let inicio = string.indexOf('Bearer');
-                    let fin = string.length;
-                    let texto;
-                    texto  = string.subtr(inicio,fin);

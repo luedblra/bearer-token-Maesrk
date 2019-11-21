@@ -1,10 +1,11 @@
-const puppeteer = require('puppeteer');
-const CREDS     = require('./creds');
-const fs        = require('fs').promises;
+const puppeteer     = require('puppeteer');
+const CREDS         = require('./creds');
+const fs            = require('fs').promises;
+const ScraperToken  = require('./Models/ScraperToken.js');
+const http          = require("http");
+const util          = require("util");
 "use strict";
 
-const http = require("http");
-const util = require("util");
 
 async function run() {
     const browser = await puppeteer.launch({headless: false,args: ['--no-sandbox', '--disable-setuid-sandbox']});
@@ -67,13 +68,30 @@ async function run() {
 
     browser.close();
 }
-  
-function extrae(data){
-    http.createServer((request, response) => {
+
+async function extrae(data){
+    /*http.createServer((request, response) => {
         response.setHeader("Content-Type", "text/plain;charset=utf-8");
         response.end(util.inspect(data));
-    }).listen(8000, "::1");
+    }).listen(8000, "::1");*/
+
+    ScraperToken.update({
+        token: data,
+    }, {
+        where: {
+            name: 'maersk'
+        }
+    });
 }
 
+function dbdata(){
+    ScraperToken.findAll({
+        attributes:['id','name','token']}).then( tokens => {
+        console.log(JSON.parse(JSON.stringify(tokens)));
+
+    }).catch( err => {
+        console.log(err);
+    })
+}
 
 run();
