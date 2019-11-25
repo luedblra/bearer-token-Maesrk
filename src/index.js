@@ -8,8 +8,11 @@ const util          = require("util");
 
 
 async function run() {
-    const browser = await puppeteer.launch({headless: false,args: ['--no-sandbox', '--disable-setuid-sandbox']});
-
+    const browser = await puppeteer.launch({
+        executablePath: 'google-chrome-unstable',
+        headless: true,args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    console.log('RUN');
     const page = await browser.newPage();
     await page.setViewport({
         width: 1024,
@@ -33,6 +36,7 @@ async function run() {
     const BUTTON_SELECTOR = '#login-form > fieldset > div:nth-child(4) > button';
     await page.click(BUTTON_SELECTOR);
     await page.waitForNavigation();
+    console.log('RUN 2');
 
     const response = await page.goto('https://www.maersk.com/instantPrice/');
 
@@ -57,7 +61,7 @@ async function run() {
             );
         }
     });
-
+    console.log('RUN 3');
     await page.waitFor(2000);
 
     //console.log('llega');
@@ -82,6 +86,7 @@ async function extrae(data){
             name: 'maersk'
         }
     });
+    console.log('RUN 4');
 }
 
 function dbdata(){
