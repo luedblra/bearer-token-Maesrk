@@ -9,8 +9,8 @@ const util          = require("util");
 
 async function run() {
     const browser = await puppeteer.launch({
-        executablePath: 'google-chrome-unstable',
-        headless: true,args: ['--no-sandbox', '--disable-setuid-sandbox']
+        executablePath: 'google-chrome',
+        headless: false,args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     console.log('RUN');
     const page = await browser.newPage();
