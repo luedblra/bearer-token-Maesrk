@@ -6,11 +6,13 @@ const http          = require("http");
 const util          = require("util");
 "use strict";
 
-
 async function run() {
+
     const browser = await puppeteer.launch({
         executablePath: 'google-chrome',
-        headless: false,args: ['--no-sandbox', '--disable-setuid-sandbox']
+        userDataDir: './data',
+        headless: true,
+        //args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     console.log('RUN');
     const page = await browser.newPage();
@@ -18,9 +20,10 @@ async function run() {
         width: 1024,
         height: 700,
     });
+
     await page.setDefaultNavigationTimeout(0); 
 
-    await page.goto('https://www.maersk.com/portaluser/login', {waitUntil: 'networkidle0', timeout: 0});
+    await page.goto('https://www.maersk.com/portaluser/login', {waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 0});
 
     const USERNAME_SELECTOR = '#usernameInput';
     const PASSWORD_SELECTOR = '#passwordInput';
